@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOVA OS — Centre de Contrôle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<style>
+:root{--bg:#02060f;--night:#050d1f;--cyan:#19d3ff;--blue:#2a7bff;--violet:#9b5cff;--glass:rgba(6,16,36,.55);--line:rgba(25,211,255,.38);--txt:#eaf8ff;--mute:#8fb4cc;--glow:0 0 18px rgba(25,211,255,.35), inset 0 0 18px rgba(25,211,255,.08);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;overflow:hidden}
+.scene{position:fixed;inset:0;z-index:0;overflow:hidden;background:radial-gradient(ellipse 60% 40% at 50% 78%,rgba(25,211,255,.22),transparent 70%),radial-gradient(ellipse 50% 35% at 85% 30%,rgba(155,92,255,.18),transparent 70%),radial-gradient(ellipse 50% 40% at 10% 40%,rgba(255,150,60,.12),transparent 70%),linear-gradient(180deg,#02050d 0%,#061230 45%,#030a18 62%,#01040a 100%)}
+.moon{position:absolute;top:9%;right:9%;width:clamp(60px,12vw,150px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#bcd6ff 40%,#5a78b8 80%);box-shadow:0 0 60px 12px rgba(150,190,255,.35);opacity:.9}
+.city{position:absolute;left:0;right:0;top:34%;height:22%;opacity:.9;background:radial-gradient(circle,#ffd27a 0 1.2px,transparent 1.8px) 0 0/22px 17px,radial-gradient(circle,#4fd8ff 0 1.2px,transparent 1.8px) 9px 6px/31px 23px,radial-gradient(circle,#ff7ad9 0 1px,transparent 1.6px) 4px 11px/43px 29px;-webkit-mask:linear-gradient(180deg,transparent,#000 40%,#000 70%,transparent);mask:linear-gradient(180deg,transparent,#000 40%,#000 70%,transparent);animation:twinkle 6s ease-in-out infinite alternate}
+@keyframes twinkle{to{opacity:.55;filter:brightness(1.4)}}
+.mountains{position:absolute;left:0;right:0;top:30%;height:14%;background:linear-gradient(160deg,transparent 48%,#0a1838 49%) 0 0/38% 100%,linear-gradient(200deg,transparent 52%,#0c1d45 53%) 20% 0/46% 100%;opacity:.8}
+.frames{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(50% - 1px),rgba(25,211,255,.12) 50%,transparent calc(50% + 1px)),linear-gradient(90deg,transparent calc(25% - 1px),rgba(25,211,255,.07) 25%,transparent calc(25% + 1px)),linear-gradient(90deg,transparent calc(75% - 1px),rgba(25,211,255,.07) 75%,transparent calc(75% + 1px))}
+.floor{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(180deg,transparent,rgba(25,211,255,.08) 40%,rgba(2,8,20,.9)),repeating-linear-gradient(90deg,rgba(25,211,255,.07) 0 1px,transparent 1px 64px);transform:perspective(500px) rotateX(45deg);transform-origin:bottom}
+.lamp{position:absolute;bottom:30%;width:14px;height:14px;border-radius:50%;background:#ffe2a8;box-shadow:0 0 30px 14px rgba(255,190,100,.45)}
+.lamp.l1{left:12%}.lamp.l2{right:14%;background:#8fe8ff;box-shadow:0 0 30px 14px rgba(60,200,255,.4)}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.75))}
+.glass{background:linear-gradient(145deg,rgba(14,34,66,.55),rgba(4,12,28,.6));-webkit-backdrop-filter:blur(15px) saturate(140%);backdrop-filter:blur(15px) saturate(140%);border:1px solid var(--line);box-shadow:var(--glow),0 12px 32px rgba(0,0,0,.5)}
+.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 0;overflow-y:auto;overflow-x:hidden;padding-bottom:96px;scrollbar-width:none}
+.app::-webkit-scrollbar{display:none}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.logo{display:flex;align-items:center;gap:8px}
+.logo svg{width:38px;filter:drop-shadow(0 0 8px var(--cyan))}
+.logo b{font-family:Orbitron;font-weight:700;font-size:15px;letter-spacing:.04em;display:block}
+.logo b i{font-style:normal;color:var(--cyan)}
+.logo small{font-size:9.5px;color:var(--cyan);display:block;opacity:.85}
+.meta{display:flex;align-items:center;gap:12px}
+.clock{text-align:right;font-family:Orbitron;font-size:18px;line-height:1.1}
+.clock small{display:block;font:400 9.5px Inter;color:var(--mute);margin-top:2px}
+.wx{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;font-size:13px}
+.wx small{display:block;font-size:9.5px;color:var(--mute)}
+main{flex:1;display:flex;flex-direction:column;align-items:center;max-width:1100px;width:100%;margin:0 auto}
+.orb{position:relative;width:min(62vw,300px);aspect-ratio:1;margin:8px 0 0;display:grid;place-items:center}
+.ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid transparent}
+.r1{border-top-color:var(--cyan);border-right-color:rgba(25,211,255,.2);animation:spin 9s linear infinite;box-shadow:0 0 22px rgba(25,211,255,.35)}
+.r2{inset:7%;border:1px dashed rgba(25,211,255,.4);animation:spin 22s linear infinite reverse}
+.r3{inset:-6%;border-bottom-color:var(--blue);border-left-color:rgba(42,123,255,.25);animation:spin 14s linear infinite}
+.sweep{position:absolute;inset:3%;border-radius:50%;background:conic-gradient(from 0deg,rgba(25,211,255,.38),transparent 22%);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%,#000 100%);mask:radial-gradient(circle,transparent 62%,#000 63%,#000 100%);animation:spin 4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb svg.head{position:relative;width:80%;filter:drop-shadow(0 0 22px rgba(25,211,255,.6));animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-6px)}}
+.orb .eye{animation:blink 5s infinite}
+@keyframes blink{0%,94%,100%{opacity:1}97%{opacity:.15}}
+.orb.talk .ring.r1{animation-duration:3s}
+.orb.talk .head{filter:drop-shadow(0 0 34px rgba(25,211,255,.95))}
+.scan{animation:scan 3.5s ease-in-out infinite alternate}
+@keyframes scan{from{transform:translateY(-70px)}to{transform:translateY(90px)}}
+.hello{text-align:center;margin-top:6px}
+.hello h1{font-family:Orbitron;font-weight:700;font-size:clamp(22px,6vw,32px);color:#fff;text-shadow:0 0 18px rgba(25,211,255,.6)}
+.hello p{color:#cfeeff;margin-top:4px;font-size:15px}
+.wave{display:flex;align-items:center;justify-content:center;gap:3px;height:28px;margin-top:8px}
+.wave span{width:3px;height:6px;border-radius:2px;background:linear-gradient(var(--cyan),var(--blue));box-shadow:0 0 8px var(--cyan);animation:eq 1.2s ease-in-out infinite}
+.wave span:nth-child(3n){animation-delay:-.4s}.wave span:nth-child(3n+1){animation-delay:-.8s}.wave span:nth-child(5n){animation-delay:-.2s}
+@keyframes eq{50%{height:24px}}
+.orb.talk ~ .hello .wave span{animation-duration:.5s}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-top:14px}
+.act{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border-radius:16px;color:var(--txt);font:500 13px Inter;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
+.act svg{width:26px;height:26px;stroke:var(--cyan);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px var(--cyan))}
+.act:hover,.act:active{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 0 28px rgba(25,211,255,.55),inset 0 0 22px rgba(25,211,255,.15)}
+h2{align-self:flex-start;font:600 14px Inter;display:flex;align-items:center;gap:8px;margin:20px 0 10px}
+h2 svg{width:18px;stroke:var(--cyan);fill:none;stroke-width:1.8}
+nav{position:fixed;z-index:5;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);height:66px;border-radius:22px;display:flex;justify-content:space-around;align-items:center;padding:0 6px}
+nav button{background:none;border:0;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:4px;font:500 10px Inter;padding:8px 10px;border-radius:14px;cursor:pointer;transition:color .2s}
+nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--cyan);background:rgba(25,211,255,.1);box-shadow:inset 0 0 14px rgba(25,211,255,.2)}
+nav button.on svg{filter:drop-shadow(0 0 6px var(--cyan))}
+.chat{position:fixed;z-index:10;left:0;right:0;bottom:0;top:8%;max-width:640px;margin:0 auto;display:flex;flex-direction:column;border-radius:26px 26px 0 0;transform:translateY(105%);transition:transform .45s cubic-bezier(.2,.9,.2,1);background:linear-gradient(180deg,rgba(6,16,36,.88),rgba(2,8,20,.94));box-shadow:0 -10px 60px rgba(25,211,255,.3),var(--glow)}
+.chat.open{transform:none}
+.chat-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(25,211,255,.2)}
+.chat-h .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.chat-h b{font:700 14px Orbitron;flex:1}
+.ib{background:rgba(25,211,255,.08);border:1px solid var(--line);color:var(--cyan);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.ib svg{width:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.ib.off{color:var(--mute);opacity:.6}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.m{max-width:88%;padding:11px 14px;border-radius:18px;font-size:14.5px;line-height:1.55;animation:in .3s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.m.u{align-self:flex-end;background:linear-gradient(135deg,#1d6bff,#0ea5d9);border-bottom-right-radius:5px;box-shadow:0 4px 18px rgba(25,150,255,.4)}
+.m.a{align-self:flex-start;background:rgba(10,28,56,.75);border:1px solid rgba(25,211,255,.3);border-bottom-left-radius:5px}
+.m.a>*:first-child{margin-top:0}.m.a>*:last-child{margin-bottom:0}
+.m p{margin:.5em 0}
+.m ul,.m ol{margin:.5em 0 .5em 1.2em}.m li{margin:.25em 0}.m li::marker{color:var(--cyan)}
+.m h1,.m h2,.m h3{font:700 15px Orbitron;color:var(--cyan);margin:.8em 0 .4em;display:block}
+.m a{color:var(--cyan)}
+.m code{background:rgba(25,211,255,.12);padding:1px 6px;border-radius:6px;font-size:13px}
+.m pre{background:#020712;border:1px solid rgba(25,211,255,.25);padding:10px;border-radius:10px;overflow-x:auto;margin:.6em 0}
+.m pre code{background:none;padding:0}
+.composer{display:flex;gap:8px;padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 14px);border-top:1px solid rgba(25,211,255,.2)}
+.composer input{flex:1;min-width:0;background:rgba(2,10,26,.8);border:1px solid var(--line);border-radius:24px;padding:12px 18px;color:var(--txt);font:15px Inter;outline:0;transition:box-shadow .2s}
+.composer input:focus{box-shadow:0 0 0 3px rgba(25,211,255,.25),0 0 20px rgba(25,211,255,.3)}
+.composer .ib{width:46px;height:46px;flex:none}
+.send{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#001018;border:0}
+.ib.rec-on{background:rgba(255,60,90,.2);color:#ff4a6b;border-color:#ff4a6b;animation:pulse 1s infinite}
+.mic-big{background:rgba(25,211,255,.1);border:1px solid var(--line);border-radius:50%;width:46px;height:46px;display:grid;place-items:center;cursor:pointer;color:var(--cyan);margin-top:10px;box-shadow:0 0 22px rgba(25,211,255,.4)}
+.mic-big svg{width:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.mic-big.rec-on{color:#ff4a6b;border-color:#ff4a6b}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="scene"><div class="moon"></div><div class="mountains"></div><div class="city"></div><div class="frames"></div><div class="floor"></div><div class="lamp l1"></div><div class="lamp l2"></div><div class="vignette"></div></div>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.6 7.1L3 20l1.2-4.6A8 8 0 1121 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 17-3-7-7-2z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 8a5 5 0 010 8M19.5 5.5a9 9 0 010 13"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</defs></svg>
+<div class="app">
+  <header>
+    <div class="logo"><svg viewBox="0 0 48 24" fill="none" stroke="#19d3ff" stroke-width="3.2" stroke-linecap="round"><path d="M24 12c-4-6-7-8-11-8a8 8 0 000 16c4 0 7-2 11-8s7-8 11-8a8 8 0 010 16c-4 0-7-2-11-8z"/></svg><div><b>NOVA <i>OS</i></b><small>Centre de Contrôle Intelligent</small></div></div>
+    <div class="meta"><div class="clock"><span id="clk">--:--</span><small id="date"></small></div><div class="wx glass"><span style="font-size:22px">⛅</span><div>8°C<small>Bruxelles</small></div></div></div>
+  </header>
+  <main>
+    <div class="orb" id="orb">
+      <div class="ring r3"></div><div class="ring r1"></div><div class="ring r2"></div><div class="sweep"></div>
+      <svg class="head" viewBox="0 0 200 220" fill="none">
+        <defs><radialGradient id="face" cx="50%" cy="38%" r="65%"><stop offset="0" stop-color="#5fd9ff"/><stop offset=".55" stop-color="#1a63e0"/><stop offset="1" stop-color="#061a5a"/></radialGradient><linearGradient id="hp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#19d3ff"/><stop offset="1" stop-color="#1a4bd0"/></linearGradient><clipPath id="hc"><path d="M100 14c-36 0-58 26-58 62 0 20 5 34 12 48 6 12 10 22 14 32 4 10 14 18 32 18s28-8 32-18c4-10 8-20 14-32 7-14 12-28 12-48 0-36-22-62-58-62z"/></clipPath></defs>
+        <path d="M100 14c-36 0-58 26-58 62 0 20 5 34 12 48 6 12 10 22 14 32 4 10 14 18 32 18s28-8 32-18c4-10 8-20 14-32 7-14 12-28 12-48 0-36-22-62-58-62z" fill="url(#face)" opacity=".92"/>
+        <g clip-path="url(#hc)" stroke="#7ff0ff" stroke-opacity=".45" stroke-width=".6"><path d="M40 40h120M36 60h128M34 80h132M36 100h128M44 120h112M54 140h92M66 160h68M78 180h44"/><path d="M100 10v210M80 10c-14 50-14 120 6 205M120 10c14 50 14 120-6 205M60 20c-24 60-12 120 22 195M140 20c24 60 12 120-22 195"/><rect class="scan" x="30" y="60" width="140" height="10" fill="#aef6ff" fill-opacity=".35" stroke="none"/></g>
+        <path d="M62 84q16-9 30 0M108 84q16-9 30 0" stroke="#031640" stroke-width="3" stroke-linecap="round"/>
+        <g class="eye"><ellipse cx="77" cy="98" rx="11" ry="6" fill="#e9fdff"/><ellipse cx="123" cy="98" rx="11" ry="6" fill="#e9fdff"/><circle cx="77" cy="98" r="4.5" fill="#19d3ff"/><circle cx="123" cy="98" r="4.5" fill="#19d3ff"/><circle cx="77" cy="98" r="14" fill="#19d3ff" opacity=".25"/><circle cx="123" cy="98" r="14" fill="#19d3ff" opacity=".25"/></g>
+        <path d="M100 104v26q-6 6 0 8M92 138q8 4 16 0" stroke="#bff6ff" stroke-opacity=".7" stroke-width="1.6" stroke-linecap="round"/><path d="M82 164q18 8 36 0" stroke="#bff6ff" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+        <path d="M40 92a60 60 0 01120 0" stroke="url(#hp)" stroke-width="6" stroke-linecap="round"/><rect x="30" y="86" width="14" height="34" rx="7" fill="url(#hp)"/><rect x="156" y="86" width="14" height="34" rx="7" fill="url(#hp)"/><path d="M34 124q0 20 30 22" stroke="#19d3ff" stroke-width="2" stroke-linecap="round"/><path d="M70 210q30 12 60 0" stroke="#19d3ff" stroke-width="2" opacity=".6"/>
+      </svg>
+    </div>
+    <div class="hello"><h1>Bienvenue Tarik</h1><p>A.R.I.A. est en ligne. Que puis-je faire ?</p><div class="wave" id="wave"></div><button class="mic-big" id="micHome" aria-label="Parler"><svg><use href="#i-mic"/></svg></button></div>
+    <div class="actions">
+      <button class="act glass" data-q="Lance un film pour ce soir"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Lancer un film</button>
+      <button class="act glass" data-q="Quel temps fait-il à Bruxelles ?"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg>La météo</button>
+    </div>
+  </main>
+</div>
+<nav class="glass" id="nav"><button class="on" data-t="home"><svg><use href="#i-home"/></svg>Accueil</button><button data-t="chat" id="navChat"><svg><use href="#i-chat"/></svg>Chat</button></nav>
+<section class="chat" id="chat" aria-label="Chat IA" aria-hidden="true">
+  <div class="chat-h"><span class="dot"></span><b>A.R.I.A. ACTIVE</b><button class="ib" id="muteBtn" title="Voix" aria-label="Activer/couper la voix"><svg viewBox="0 0 24 24"><use href="#i-vol"/></svg></button><button class="ib" id="closeBtn" aria-label="Fermer"><svg viewBox="0 0 24 24"><use href="#i-x"/></svg></button></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="composer"><button class="ib" id="micBtn" aria-label="Micro"><svg viewBox="0 0 24 24"><use href="#i-mic"/></svg></button><input id="inp" type="text" placeholder="Écris ou parle…" autocomplete="off" enterkeyhint="send"><button class="ib send" id="sendBtn" aria-label="Envoyer"><svg viewBox="0 0 24 24"><use href="#i-send"/></svg></button></div>
+</section>
+<script>
+const $ = s => document.querySelector(s);
+const chat = $('#chat'), msgs = $('#msgs'), inp = $('#inp'), orb = $('#orb');
+let voiceOn = true, voices = [], busy = false;
+function tick(){ const d = new Date(); $('#clk').textContent = d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); $('#date').textContent = d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',year:'numeric'}); }
+tick(); setInterval(tick, 15000);
+$('#wave').innerHTML = Array.from({length:31},(_,i)=>`<span style="animation-duration:${(0.8+Math.abs(Math.sin(i))*.8).toFixed(2)}s;opacity:${(1-Math.abs(i-15)/18).toFixed(2)}"></span>`).join('');
+function openChat(){ chat.classList.add('open'); chat.setAttribute('aria-hidden','false'); setTimeout(()=>inp.focus(),400); if(!msgs.children.length) add('a','Bonjour Tarik ! Je suis A.R.I.A., ton assistante NOVA. Que puis-je faire pour toi ?'); }
+function closeChat(){ chat.classList.remove('open'); chat.setAttribute('aria-hidden','true'); speechSynthesis.cancel(); orb.classList.remove('talk'); }
+function setNav(t){ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t)); }
+$('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; if(b.dataset.t==='chat') openChat(); else if(b.dataset.q){ setNav(b.dataset.t); send(b.dataset.q); } else { closeChat(); setNav(b.dataset.t); } });
+$('#closeBtn').onclick = closeChat;
+$('#muteBtn').onclick = e => { voiceOn=!voiceOn; e.currentTarget.classList.toggle('off',!voiceOn); if(!voiceOn){speechSynthesis.cancel();orb.classList.remove('talk');} };
+function add(role, text){ const d = document.createElement('div'); d.className = 'm ' + role; if(role==='a') d.innerHTML = DOMPurify.sanitize(marked.parse(text,{breaks:true,gfm:true})); else d.textContent = text; msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight; return d; }
+function typing(){ const d=document.createElement('div'); d.className='m a typing'; d.innerHTML='<i></i><i></i><i></i>'; msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight; return d; }
+async function send(text){
+  text = (text ?? inp.value).trim(); if(!text || busy) return;
+  if(!chat.classList.contains('open')) openChat();
+  inp.value=''; busy=true; speechSynthesis.cancel();
+  add('u', text); const t = typing();
+  try{
+    const r = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:text})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const raw = await r.text(); let answer = raw;
+    try{ const j = JSON.parse(raw); answer = j.response?.message || j.response || j.message || raw; }catch(_){}
+    t.remove(); add('a', String(answer)); speak(String(answer));
+  }catch(err){ t.remove(); add('a','⚠️ **Connexion impossible** au serveur.\n\n<small>'+err.message+'</small>'); }finally{ busy=false; }
+}
+$('#sendBtn').onclick = () => send();
+inp.addEventListener('keydown',e=>{ if(e.key==='Enter') send(); });
+document.querySelectorAll('.act,[data-q].app-tile,.rec').forEach(b=>b.onclick=()=>send(b.dataset.q));
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const synth = window.speechSynthesis;
+const $q = s => document.querySelector(s);
+let speakQueue = [], speechGen = 0;
+const keepAlive = [];
+function loadVoices(){ voices = synth.getVoices(); }
+loadVoices(); synth.onvoiceschanged = loadVoices;
+function pickVoice(){ const fr = voices.filter(v => /^fr/i.test(v.lang)); for (const re of [/am[ée]lie/i, /audrey/i, /julie/i, /marie/i, /google.*fran/i, /denise|eloise|vivienne|hortense/i]) { const v = fr.find(v => re.test(v.name)); if (v) return v; } return fr.find(v => !/thomas|paul|henri|claude|antoine/i.test(v.name)) || fr[0] || null; }
+function cleanForSpeech(md){ return md.replace(/```[\s\S]*?```/g,' ').replace(/`([^`]*)`/g,'$1').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/<[^>]+>/g,' ').replace(/^\s*#{1,6}\s*/gm,'').replace(/^\s*[-*+]\s+/gm,'').replace(/^\s*\d+\.\s+/gm,'').replace(/^\s*>\s?/gm,'').replace(/\|/g,', ').replace(/[*_~#]+/g,'').replace(/\s*\n+\s*/g,'. ').replace(/\s{2,}/g,' ').trim(); }
+function chunk(t){ const parts = t.match(/[^.!?…]+[.!?…]*\s*/g) || [t], out = []; let cur = ''; for (const p of parts){ if ((cur + p).length > 180 && cur){ out.push(cur.trim()); cur = p; } else cur += p; } if (cur.trim()) out.push(cur.trim()); return out; }
+function setTalking(on){ const o = $q('#orb'); if (o) o.classList.toggle('talk', on); }
+function stopVoice(){ speechGen++; speakQueue = []; keepAlive.length = 0; try { synth.cancel(); } catch(_) {} setTalking(false); }
+function speak(md){ if (!voiceOn) return; stopVoice(); speakQueue = chunk(cleanForSpeech(md)); if (!speakQueue.length) return; const gen = speechGen; setTimeout(() => nextChunk(gen), 200); }
+function nextChunk(gen){ if (gen !== speechGen) return; if (!speakQueue.length){ setTalking(false); return; } const u = new SpeechSynthesisUtterance(speakQueue.shift()); const v = pickVoice(); if (v) u.voice = v; u.lang = v ? v.lang : 'fr-FR'; u.pitch = 1.1; u.rate = 1.0; u.onstart = () => { if (gen === speechGen) setTalking(true); }; u.onend = u.onerror = () => { const i = keepAlive.indexOf(u); if (i > -1) keepAlive.splice(i, 1); nextChunk(gen); }; keepAlive.push(u); try { synth.resume(); } catch(_) {} synth.speak(u); }
+document.addEventListener('pointerdown', () => { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); }, { once: true });
+let rec = null, micState = 'idle';
+let finalText = '', lastText = '', sent = false, watchdog = null;
+function setMic(on){ ['#micBtn', '#micHome'].forEach(s => { const b = $q(s); if (b) b.classList.toggle('rec-on', on); }); if (typeof inp !== 'undefined') inp.placeholder = on ? '🎤 Je vous écoute…' : 'Écris ou parle…'; }
+function destroyRec(){ if (!rec) return; const r = rec; rec = null; r.onstart = r.onresult = r.onerror = r.onend = null; try { r.abort(); } catch(_) {} }
+function finish(noSend){ if (micState === 'idle') return; clearTimeout(watchdog); const text = (finalText || lastText).trim(); destroyRec(); micState = 'idle'; setMic(false); if (!noSend && !sent && text){ sent = true; send(text); } }
+function startRecognition(){ destroyRec(); finalText = ''; lastText = ''; sent = false; const r = new SR(); rec = r; r.lang = 'fr-FR'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1; r.onstart = () => { if (rec !== r) return; micState = 'listening'; setMic(true); }; r.onresult = e => { if (rec !== r) return; let fin = '', interim = ''; for (let i = e.resultIndex; i < e.results.length; i++){ const t = e.results[i][0].transcript; e.results[i].isFinal ? fin += t : interim += t; } if (fin) finalText += fin; lastText = (finalText + interim).trim(); if (typeof inp !== 'undefined') inp.value = lastText; if (fin) finish(); }; r.onerror = e => { if (rec !== r) return; if (e.error === 'not-allowed' || e.error === 'service-not-allowed') alert('Micro refusé : Réglages iPhone → Safari → Micro.'); finish(e.error !== 'no-speech' && e.error !== 'aborted'); }; r.onend = () => { if (rec === r) finish(); }; clearTimeout(watchdog); watchdog = setTimeout(() => finish(), 12000); try { r.start(); } catch(_) { finish(true); } }
+function toggleMic(){ if (!SR){ alert('Reconnaissance vocale indisponible.'); return; } if (micState === 'listening'){ try { rec.stop(); } catch(_) {} setTimeout(() => finish(), 1500); return; } if (micState === 'starting') return; micState = 'starting'; stopVoice(); if (typeof chat !== 'undefined' && !chat.classList.contains('open')) openChat(); setTimeout(startRecognition, 350); }
+['#micBtn', '#micHome'].forEach(s => { const b = $q(s); if (b) b.onclick = toggleMic; });
+</script>
+</body>
+</html>
