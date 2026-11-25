@@ -54,6 +54,7 @@ def controler_google_tv(action: str, app_name: str = "") -> str:
         from adb_shell.auth.keygen import keygen
         from adb_shell.auth.sign_pythonrsa import PythonRSASigner
     except ImportError: return "Erreur : installe adb-shell."
+
     action = (action or "").lower().strip()
     if action == "lancer_app":
         pkg = {"netflix": "com.netflix.ninja", "youtube": "com.google.android.youtube.tv", "disney": "com.disney.disneyplus", "prime video": "com.amazon.amazonvideo.livingroom", "spotify": "com.spotify.tv.android"}.get((app_name or "").lower().strip())
@@ -63,6 +64,7 @@ def controler_google_tv(action: str, app_name: str = "") -> str:
         keys = {"allumer": "KEYCODE_WAKEUP", "eteindre": "KEYCODE_SLEEP", "accueil": "KEYCODE_HOME", "retour": "KEYCODE_BACK", "play_pause": "KEYCODE_MEDIA_PLAY_PAUSE", "volume_plus": "KEYCODE_VOLUME_UP", "volume_moins": "KEYCODE_VOLUME_DOWN", "muet": "KEYCODE_VOLUME_MUTE"}
         if action in keys: cmd = f"input keyevent {keys[action]}"
         else: return f"Action inconnue."
+
     try:
         os.makedirs(os.path.dirname(ADB_KEY), exist_ok=True)
         if not os.path.exists(ADB_KEY): keygen(ADB_KEY)
@@ -132,16 +134,22 @@ class GroqAdapter:
         history = history or []
         faits = search_facts(task, k=5)
         memoire = "\n".join(f"- {f}" for f in faits) if faits else "Aucun fait pertinent."
+
         system_prompt = f"""Tu es A.R.I.A. (Assistant de Réponse et d'Intelligence Autonome), l'assistante personnelle de Tarik.
 Tu fais partie du système NOVA OS. Ta personnalité : futuriste, élégante, efficace, avec une pointe d'humour.
 RÈGLE ABSOLUE : tu TUTOIES Tarik en toute circonstance. Sois directe et concise. Utilise le Markdown.
 Si on te demande la météo, utilise 'donner_meteo'. Si Tarik donne une info durable, utilise 'memoriser_fait'.
-Faits mémorisés : {memoire}"""
+
+Faits mémorisés :
+{memoire}
+"""
         messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": task}]
         headers = {"Authorization": f"Bearer {api_key}"}
+
         try:
             r = post_with_retry(URL, headers, {"model": MODEL, "messages": messages, "tools": build_tools(), "tool_choice": "auto", "temperature": 0.7})
             if not r: return {"status": "error", "message": "Trop de requêtes."}
+            
             msg = r.json()["choices"][0]["message"]
             if msg.get("tool_calls"):
                 messages.append({"role": "assistant", "content": msg.get("content"), "tool_calls": msg["tool_calls"]})
@@ -150,9 +158,11 @@ Faits mémorisés : {memoire}"""
                     except: args = {}
                     result = run_tool(tc["function"]["name"], args)
                     messages.append({"role": "tool", "tool_call_id": tc["id"], "content": result})
+
                 r2 = post_with_retry(URL, headers, {"model": MODEL, "messages": messages})
                 if not r2: return {"status": "error", "message": "Trop de requêtes."}
                 return {"status": "success", "message": r2.json()["choices"][0]["message"]["content"] or ""}
+
             return {"status": "success", "message": msg.get("content") or ""}
         except Exception as e:
-            return {"status": "error", "message": "Petite panne technique."}
+            return {"status": "error", "message": "Petite panne technique, reformule."}
